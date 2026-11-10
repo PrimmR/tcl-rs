@@ -95,19 +95,15 @@ impl Obj {
             unsafe{ clib::Tcl_ListObjGetElements( null_mut(), self.as_ptr(), &mut objc, &mut objv )}
             .unit_result()
             .map_err( |_| NotList( self ))?;
-
-            if objc == 0 {
-                Vec::new()
+     
+            if objv.is_null() {
+                &[]
             } else {
-                unsafe {
-                    slice::from_raw_parts( objv, objc as usize )
-                        .iter()
-                        .map( |tcl_obj| Obj::from_raw( *tcl_obj ))
-                        .collect::<Vec<_>>()
-                }
+                unsafe { slice::from_raw_parts( objv, objc as usize ) }
             }
         };
-        Ok( objs.into_iter() )
+    
+        Ok( objs.into_iter().map( |tcl_obj| unsafe { Obj::from_raw( *tcl_obj ) }) )
     }
 
     /// Returns the amount of list elements.
