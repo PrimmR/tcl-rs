@@ -96,11 +96,15 @@ impl Obj {
             .unit_result()
             .map_err( |_| NotList( self ))?;
 
-            unsafe {
-                slice::from_raw_parts( objv, objc as usize )
-                    .iter()
-                    .map( |tcl_obj| Obj::from_raw( *tcl_obj ))
-                    .collect::<Vec<_>>()
+            if objc == 0 {
+                Vec::new()
+            } else {
+                unsafe {
+                    slice::from_raw_parts( objv, objc as usize )
+                        .iter()
+                        .map( |tcl_obj| Obj::from_raw( *tcl_obj ))
+                        .collect::<Vec<_>>()
+                }
             }
         };
         Ok( objs.into_iter() )
